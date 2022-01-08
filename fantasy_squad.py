@@ -6,7 +6,6 @@ from app.models import User, Role, GameDetails
 
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 migrate = Migrate(app, db)
-db.create_all()
 
 @app.shell_context_processor
 def make_shell_context():
@@ -29,7 +28,7 @@ def deploy():
     """Run deployment tasks."""
     # migrate database to latest revision  
     print ('i have been deployed')
-    Migrate(app, db)
+    #Migrate(app, db)
     upgrade()
 
     # create or update user roles
