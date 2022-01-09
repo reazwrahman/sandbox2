@@ -5,81 +5,115 @@ from ast import literal_eval
 from . import fantasyContest
 from .. import db
 from ..models import GameDetails, SelectedSquad, User 
-from .forms import ActviveContestantsForm
+from .forms import ActviveContestantsForm, ActiveGamesForm
 
 from .FantasyPointsCalculatorIF import FantasyPointsForFullSquad
 
 
-@fantasyContest.route('/displayActiveGames', methods=['GET', 'POST'])
+@fantasyContest.route('/', methods=['GET', 'POST'])
 def displayActiveGames(): 
-    pass 
+    active_games_query = GameDetails.query.filter_by(game_status = 'Active')
+    active_games_all=active_games_query.all()
+    
+    active_games_list=[]
+    for each in active_games_all: 
+        active_games_list.append((each.match_id,each.game_title))
+    
+    form= ActiveGamesForm() 
+    form.game_selection.choices=active_games_list 
+
+    if form.validate_on_submit(): 
+        selected_game_id=form.game_selection.data  
+        return redirect(url_for('fantasyContest.displayContestRanking', match_id=selected_game_id))
+
+    return render_template('fantasyContest/displayActiveGames.html',form=form) 
 
 @fantasyContest.route('/displayContestRanking', methods=['GET', 'POST'])
-def displayContestRanking():  
-    ranked_contestants = __rankContestants__ (match_id=1288979)  
-    user_selection_tuples=[] 
-    for each in ranked_contestants: 
-            user_selection_tuples.append((each[1],each[1]))
+def displayContestRanking():   
+    match_id = request.args['match_id'] 
 
-    form= ActviveContestantsForm() 
-    form.user_selection.choices=user_selection_tuples 
-    if form.validate_on_submit():  
-        user_name = form.user_selection.data   
-        match_id=1288979
-        full_url=f'fantasyContest/displayFullSquadSummary/{match_id}/{user_name}'
-        return redirect (url_for('fantasyContest.displayFullSquadSummary', match_id=1288979, user_name=user_name))
+    ## check if score card is available yet
+    game_object=GameDetails.query.filter_by(match_id=match_id).first()   
+    scorecard_link=game_object.scorecard_link 
 
-    return render_template('fantasyContest/experimental.html', ranked_contestants=ranked_contestants, form=form)
+    if scorecard_link == None or len(scorecard_link) < 5: ## just an arbitrary number to avoid empty string 
+        return render_template('fantasyContest/waitForScorecardPage.html') 
+    
+    else:
+        ranked_contestants = __rankContestants__ (match_id=match_id)  
+        user_selection_tuples=[] 
+        for each in ranked_contestants: 
+                user_selection_tuples.append((each[1],each[1]))
+
+        form= ActviveContestantsForm() 
+        form.user_selection.choices=user_selection_tuples 
+        if form.validate_on_submit():  
+            user_name = form.user_selection.data   
+            return redirect (url_for('fantasyContest.displayFullSquadSummary', match_id=match_id, user_name=user_name))
+
+        return render_template('fantasyContest/experimental.html', ranked_contestants=ranked_contestants, form=form)
 
 
 @fantasyContest.route('/displayFullSquadSummary', methods=['GET', 'POST'])
 def displayFullSquadSummary():   
     match_id = request.args['match_id'] 
-    user_name = request.args['user_name']
-    # first find the user id 
-    user_id = User.query.filter_by(username=user_name).first().id
-    Fantasy_Calculator = __getFantasyCalculatorObject__(match_id=match_id, user_id = user_id)
-    full_squad_df=Fantasy_Calculator.GetFullSquadDf()  
-   
-    df_display= { 
-                'headings' : FantasyPointsForFullSquad.GetDfHeadingsList(full_squad_df), 
-                'rows' : FantasyPointsForFullSquad.GetDfRowsList(full_squad_df), 
-                'total_points': Fantasy_Calculator.GetTotalFantasyPoints(), 
-                'user_name': user_name
-                }
+    user_name = request.args['user_name'] 
 
-    return render_template("fantasyContest/viewFantasyPointSummary.html", df_display=df_display) 
+    ## check if score card is available yet
+    game_object=GameDetails.query.filter_by(match_id=match_id).first()   
+    scorecard_link=game_object.scorecard_link 
+
+    if scorecard_link == None or len(scorecard_link) < 5: ## just an arbitrary number to avoid empty string 
+        return render_template('fantasyContest/waitForScorecardPage.html') 
+    
+    else:
+        # first find the user id 
+        user_id = User.query.filter_by(username=user_name).first().id
+        Fantasy_Calculator = __getFantasyCalculatorObject__(match_id=match_id, user_id = user_id)
+        full_squad_df=Fantasy_Calculator.GetFullSquadDf()  
+    
+        df_display= { 
+                    'headings' : FantasyPointsForFullSquad.GetDfHeadingsList(full_squad_df), 
+                    'rows' : FantasyPointsForFullSquad.GetDfRowsList(full_squad_df), 
+                    'total_points': Fantasy_Calculator.GetTotalFantasyPoints(), 
+                    'user_name': user_name
+                    }
+
+        return render_template("fantasyContest/viewFantasyPointSummary.html", df_display=df_display) 
 
 
 @fantasyContest.route('/displayPointsBreakdown', methods=['GET', 'POST'])
 def displayPointsBreakdown():  
     # new tables showing batting, bowling, fielding breakdowns 
-    ## low priority
+    ## low priority TODO
     pass
 
 
 
 @fantasyContest.route('/viewMyFantasyPoint', methods=['GET', 'POST'])
 def viewMyFantasyPoint(): 
+    match_id = request.args['match_id'] 
 
-    Fantasy_Calculator = __getFantasyCalculatorObject__(match_id=1288979, user_id = current_user.id)
-    full_squad_df=Fantasy_Calculator.GetFullSquadDf()  
-    user_name= User.query.filter_by(id=current_user.id).first().username
-   
-    df_display= { 
-                'headings' : FantasyPointsForFullSquad.GetDfHeadingsList(full_squad_df), 
-                'rows' : FantasyPointsForFullSquad.GetDfRowsList(full_squad_df), 
-                'total_points': Fantasy_Calculator.GetTotalFantasyPoints(), 
-                'user_name': user_name
-                }
+    ## check if score card is available yet
+    game_object=GameDetails.query.filter_by(match_id=match_id).first()   
+    scorecard_link=game_object.scorecard_link 
 
-    return render_template("fantasyContest/viewFantasyPointSummary.html", df_display=df_display)
+    if scorecard_link == None or len(scorecard_link) < 5: ## just an arbitrary number to avoid empty string 
+        return render_template('fantasyContest/waitForScorecardPage.html') 
+    
+    else:
+        Fantasy_Calculator = __getFantasyCalculatorObject__(match_id=match_id, user_id = current_user.id)
+        full_squad_df=Fantasy_Calculator.GetFullSquadDf()  
+        user_name= User.query.filter_by(id=current_user.id).first().username
+    
+        df_display= { 
+                    'headings' : FantasyPointsForFullSquad.GetDfHeadingsList(full_squad_df), 
+                    'rows' : FantasyPointsForFullSquad.GetDfRowsList(full_squad_df), 
+                    'total_points': Fantasy_Calculator.GetTotalFantasyPoints(), 
+                    'user_name': user_name
+                    }
 
-## TODO: VIEW DETAILS BUTTON WITH ALL THREE DF BREAKDOWNS, 
-## ACTIVE GAME DISPLAY -> SHOW RANKING BETWEEN ALL USERS(SEPARATE PYTHON FILE)
-## FORM TO CHOOSE USER -> SUMMARY PAGE  
-## VIEW MY FANTASY POINT BUTTON -> SUMMARY PAGE 
-
+        return render_template("fantasyContest/viewFantasyPointSummary.html", df_display=df_display)
 
 
 

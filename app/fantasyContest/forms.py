@@ -11,4 +11,10 @@ class ActviveContestantsForm(FlaskForm):
 
 ######## ------------------------------------------------------####
 
+############# FORM TO DISPLAY ACTIVE GAMES IN THE DATABASE AND COLLECT USER INPUT
+class ActiveGamesForm(FlaskForm): 
+    
+    game_selection = SelectField(u'Select a game: ', coerce=int)
+    submit = SubmitField('Next')  
 
+######## ------------------------------------------------------####  

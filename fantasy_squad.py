@@ -1,7 +1,7 @@
 import os
 import click
 from flask_migrate import Migrate, upgrade, MigrateCommand 
-from flask.ext.script import Manager, Shell
+from flask_script import Manager, Shell
 from app import create_app, db
 from app.models import User, Role, GameDetails
 
@@ -33,7 +33,6 @@ def deploy():
     """Run deployment tasks."""
     # migrate database to latest revision  
     print ('i have been deployed')
-    #Migrate(app, db)
     upgrade()
 
     # create or update user roles
@@ -43,4 +42,4 @@ def deploy():
     #User.add_self_follows()
 
 if __name__=="__main__": 
-    manager.run()
+    app.run()

@@ -52,8 +52,7 @@ class GameDetails(db.Model):
     scorecard_link=db.Column(db.String)  
     points_per_run=db.Column(db.Float) 
     points_per_wicket=db.Column(db.Float)
-    ## TODO
-    #game_start_time : DateTime type from sqlAlchemy
+    game_start_time = db.Column(db.String)
     
 
     def __repr__(self):
