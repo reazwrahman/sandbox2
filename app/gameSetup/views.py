@@ -16,7 +16,8 @@ def SetupGame():
             game_details = GameDetails(game_title=form.game_title.data, 
                         match_id=form.match_id.data,
                         game_status=form.game_status.data,
-                        squad_link=form.squad_link.data)
+                        squad_link=form.squad_link.data, 
+                        game_start_time=form.game_start_time.data)
             db.session.add(game_details)
             db.session.commit()
             flash('Game details have been stored in  database')
