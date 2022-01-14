@@ -18,8 +18,6 @@ class FantasyFieldingPoints(object) :
         
     def __GenerateRawDf__(self): 
         fielders = []
-        #for team in [1,2]:          
-        #for wicket in self.batsmen_df[self.batsmen_df["Team"] == team]["Desc"]: 
         for wicket in self.batsmen_df["Desc"]:
             if wicket.find("c & b") == 0:
                 fielders.append(wicket.split("c & b")[1].strip())
