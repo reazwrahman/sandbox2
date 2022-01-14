@@ -18,3 +18,6 @@ class ActiveGamesForm(FlaskForm):
     submit = SubmitField('Next')  
 
 ######## ------------------------------------------------------####  
+class ViewDetailsForm(FlaskForm):  
+    #game_selection = SelectField(u'Select a game: ', coerce=int)
+    submit = SubmitField('View Details')  

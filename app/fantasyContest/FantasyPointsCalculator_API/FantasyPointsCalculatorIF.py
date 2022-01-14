@@ -6,7 +6,18 @@ Created on Sun Jan  2 11:04:29 2022
 @author: Reaz
 """
 
-from .FantasyPointsCalculator import *
+#python includes 
+import pandas as pd
+
+
+## Project Includes
+from .FantasyPointsCalculator.ScoreCardGenerator.BattingScoreCardGenerator import BattingScoreCard 
+from .FantasyPointsCalculator.ScoreCardGenerator.BowlingScoreCardGenerator import BowlingScoreCard 
+from .FantasyPointsCalculator.ScoreCardGenerator.FieldingScoreCardGenerator import FieldingScoreCard
+
+from .FantasyPointsCalculator.FantasyBattingPointsGenerator import FantasyBattingPoints 
+from .FantasyPointsCalculator.FantasyBowlingPointsGenerator import FantasyBowlingPoints
+from .FantasyPointsCalculator.FantasyFieldingPointsGenerator import FantasyFieldingPoints
 
 
 ''' 
@@ -28,18 +39,23 @@ output format:
 class FantasyPointsForFullSquad(object): 
     def __init__(self,user_inputs_dict): 
         self.parameters_dict=user_inputs_dict  
-        self.scoreCardGenerator = ScoreCardDf(self.parameters_dict['score_card_url']) 
         
-        self.batting_object=FantasyBattingPoints(self.scoreCardGenerator.GetBattingDf(),  
+        ## get all the scorecards
+        self.batting_scorecard=BattingScoreCard(self.parameters_dict['score_card_url'])
+        self.bowling_scorecard=BowlingScoreCard(self.parameters_dict['score_card_url']) 
+        self.fielding_scorecard=FieldingScoreCard(self.parameters_dict['score_card_url']) 
+        
+        ## calculate all the fantasy points
+        self.batting_object=FantasyBattingPoints(self.batting_scorecard.GetBattingDf(),  
                                                     self.parameters_dict['squad'], 
-                                                    self.parameters_dict['points_per_run']) 
+                                                    points_per_run=self.parameters_dict['points_per_run']) 
         
-        self.bowling_object=FantasyBowlingPoints(self.scoreCardGenerator.GetBowlingDf(),  
+        self.bowling_object=FantasyBowlingPoints(self.bowling_scorecard.GetBowlingDf(),  
                                                     self.parameters_dict['squad'], 
-                                                    self.parameters_dict['points_per_wicket'])
+                                                    points_per_wicket=self.parameters_dict['points_per_wicket'])
         
         
-        self.fielding_object=FantasyFieldingPoints(self.scoreCardGenerator.GetBattingDf(),  
+        self.fielding_object=FantasyFieldingPoints(self.fielding_scorecard.GetFieldingDf(),  
                                                     self.parameters_dict['squad'])
         
     
@@ -71,11 +87,22 @@ class FantasyPointsForFullSquad(object):
             if each in self.parameters_dict['captain']: 
                 final_dict[each]['Cap_Vc']=final_dict[each]['Total'] 
                 final_dict[each]['Total']*=2  
+                captain=each
+
                 
             if each in self.parameters_dict['vice_captain']: 
                 final_dict[each]['Cap_Vc']=final_dict[each]['Total']/2 
-                final_dict[each]['Total']*=1.5 
+                final_dict[each]['Total']*=1.5  
+                vice_captain=each 
+          
         
+        ## change the keys to reflect he is the fantasy captain 
+        final_dict[f'{captain} [captain]']=final_dict[captain] 
+        del(final_dict[captain]) 
+        ## change the keys to reflect he is the fantasy vice captain 
+        final_dict[f'{vice_captain} [vc]']=final_dict[vice_captain] 
+        del(final_dict[vice_captain])
+
         return final_dict 
     
     
@@ -157,37 +184,39 @@ class FantasyPointsForFullSquad(object):
         for i in range(len(df)): 
             rows.append(list(df.loc[i]))
         return rows
-
+              
 def test():    
     #score_url='https://www.espncricinfo.com/series/india-in-south-africa-2021-22-1277060/south-africa-vs-india-1st-test-1277079/full-scorecard'
-    #score_url='https://www.espncricinfo.com/series/bangladesh-in-new-zealand-2021-22-1288977/new-zealand-vs-bangladesh-1st-test-1288979/full-scorecard'
-    score_url='https://www.espncricinfo.com/series/india-in-south-africa-2021-22-1277060/south-africa-vs-india-1st-test-1277079/full-scorecard'
+    score_url='https://www.espncricinfo.com/series/bangladesh-in-new-zealand-2021-22-1288977/new-zealand-vs-bangladesh-1st-test-1288979/full-scorecard'
+    #score_url='https://www.espncricinfo.com/series/india-in-south-africa-2021-22-1277060/south-africa-vs-india-1st-test-1277079/full-scorecard'
     #score_url='https://www.espncricinfo.com/series/super-smash-2021-22-1289602/central-districts-vs-auckland-14th-match-1289618/full-scorecard'
     
     
     ### make me a random squad so i can test ###  
-    from ListOfAllPlayers import AllPlayers 
+    from FantasyPointsCalculator.SquadGenerator.ListOfAllPlayers import AllPlayers 
     import random
     #squad_url='https://www.espncricinfo.com/series/bangladesh-in-new-zealand-2021-22-1288977/new-zealand-vs-bangladesh-1st-test-1288979/match-playing-xi' 
     squad_url='https://www.espncricinfo.com/series/india-in-south-africa-2021-22-1277060/south-africa-vs-india-1st-test-1277079/match-squads'
     
-    squads=AllPlayers(squad_url) 
-    full_squad=squads.GetFullSquad() 
-    random_squad=[]  
-    while len(random_squad)!=11:  
-        random_index=random.randrange(len(full_squad)) 
-        if full_squad[random_index] not in random_squad:
-            random_squad.append(full_squad[random_index])
+    # squads=AllPlayers(squad_url) 
+    # full_squad=squads.GetFullSquad() 
+    # random_squad=[]  
+    # while len(random_squad)!=11:  
+    #     random_index=random.randrange(len(full_squad)) 
+    #     if full_squad[random_index] not in random_squad:
+    #         random_squad.append(full_squad[random_index])
             
-        
-    user_inputs_dict={  
-     'score_card_url': score_url,  
-     'squad': random_squad,   
-     'captain':random_squad[0], 
-     'vice_captain': random_squad[1],
-     'points_per_run': 1, 
-     'points_per_wicket': 20, 
-     }   
+    
+    random_squad=['Devon Conway top-order batter', 'Henry Nicholls top-order batter', 'Ross Taylor middle-order batter', 'Mahmudul Hasan Joy top-order batter', 'Najmul Hossain Shanto top-order batter', 'Shadman Islam opening batter', 'Trent Boult bowler', 'Tim Southee bowler', 'Neil Wagner bowler', 'Shoriful Islam bowler', 'Mehidy Hasan Miraz allrounder']
+    
+    user_inputs_dict={ 
+      'score_card_url': score_url,  
+      'squad': random_squad,   
+      'captain':random_squad[0], 
+      'vice_captain': random_squad[1],
+      'points_per_run': 1, 
+      'points_per_wicket': 20, 
+      }   
     
     test=FantasyPointsForFullSquad(user_inputs_dict) 
     print (test.GetBattingDf())

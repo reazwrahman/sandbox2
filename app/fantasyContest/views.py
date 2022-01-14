@@ -5,9 +5,9 @@ from ast import literal_eval
 from . import fantasyContest
 from .. import db
 from ..models import GameDetails, SelectedSquad, User 
-from .forms import ActviveContestantsForm, ActiveGamesForm
+from .forms import ActviveContestantsForm, ActiveGamesForm, ViewDetailsForm
 
-from .FantasyPointsCalculatorIF import FantasyPointsForFullSquad
+from .FantasyPointsCalculator_API.FantasyPointsCalculatorIF import FantasyPointsForFullSquad
 
 
 @fantasyContest.route('/', methods=['GET', 'POST'])
@@ -58,7 +58,6 @@ def displayContestRanking():
 def displayFullSquadSummary():   
     match_id = request.args['match_id'] 
     user_name = request.args['user_name'] 
-
     ## check if score card is available yet
     game_object=GameDetails.query.filter_by(match_id=match_id).first()   
     scorecard_link=game_object.scorecard_link 
@@ -67,6 +66,7 @@ def displayFullSquadSummary():
         return render_template('fantasyContest/waitForScorecardPage.html') 
     
     else:
+        form = ViewDetailsForm()     
         # first find the user id 
         user_id = User.query.filter_by(username=user_name).first().id
         Fantasy_Calculator = __getFantasyCalculatorObject__(match_id=match_id, user_id = user_id)
@@ -77,16 +77,14 @@ def displayFullSquadSummary():
                     'rows' : FantasyPointsForFullSquad.GetDfRowsList(full_squad_df), 
                     'total_points': Fantasy_Calculator.GetTotalFantasyPoints(), 
                     'user_name': user_name
-                    }
+                    } 
+        if form.validate_on_submit(): 
+            return redirect(url_for('fantasyContest.displayPointsBreakdown', match_id=match_id, user_name=user_name))
 
-        return render_template("fantasyContest/viewFantasyPointSummary.html", df_display=df_display) 
+        return render_template("fantasyContest/viewFantasyPointSummary.html", df_display=df_display, 
+                                form=form) 
 
 
-@fantasyContest.route('/displayPointsBreakdown', methods=['GET', 'POST'])
-def displayPointsBreakdown():  
-    # new tables showing batting, bowling, fielding breakdowns 
-    ## low priority TODO
-    pass
 
 
 
@@ -101,7 +99,8 @@ def viewMyFantasyPoint():
     if scorecard_link == None or len(scorecard_link) < 5: ## just an arbitrary number to avoid empty string 
         return render_template('fantasyContest/waitForScorecardPage.html') 
     
-    else:
+    else: 
+        form = ViewDetailsForm()   
         Fantasy_Calculator = __getFantasyCalculatorObject__(match_id=match_id, user_id = current_user.id)
         full_squad_df=Fantasy_Calculator.GetFullSquadDf()  
         user_name= User.query.filter_by(id=current_user.id).first().username
@@ -111,9 +110,48 @@ def viewMyFantasyPoint():
                     'rows' : FantasyPointsForFullSquad.GetDfRowsList(full_squad_df), 
                     'total_points': Fantasy_Calculator.GetTotalFantasyPoints(), 
                     'user_name': user_name
-                    }
+                    } 
+        if form.validate_on_submit(): 
+            return redirect(url_for('fantasyContest.displayPointsBreakdown', match_id=match_id, user_name=user_name))
 
-        return render_template("fantasyContest/viewFantasyPointSummary.html", df_display=df_display)
+        return render_template('fantasyContest/viewFantasyPointSummary.html', df_display=df_display, 
+                              form=form) 
+
+
+
+@fantasyContest.route('/displayPointsBreakdown', methods=['GET', 'POST'])
+def displayPointsBreakdown():   
+    match_id = request.args['match_id'] 
+    user_name = request.args['user_name']   
+    user_id = User.query.filter_by(username=user_name).first().id
+    Fantasy_Calculator = __getFantasyCalculatorObject__(match_id=match_id, user_id = user_id)
+
+    batting_df = Fantasy_Calculator.GetBattingDf() 
+    bowling_df = Fantasy_Calculator.GetBowlingDf() 
+    fielding_df = Fantasy_Calculator.GetFieldingDf()
+
+    df_display= {  
+        'user_name': user_name,
+        'batting_display' : {'headings' : FantasyPointsForFullSquad.GetDfHeadingsList(batting_df), 
+                            'rows' : FantasyPointsForFullSquad.GetDfRowsList(batting_df), 
+                            'total_points': Fantasy_Calculator.GetTotalBattingPoints() 
+                            },
+                             
+        'bowling_display' : {'headings' : FantasyPointsForFullSquad.GetDfHeadingsList(bowling_df), 
+                            'rows' : FantasyPointsForFullSquad.GetDfRowsList(bowling_df), 
+                            'total_points': Fantasy_Calculator.GetTotalBowlingPoints() 
+                            },
+                            
+
+        'fielding_display' : {'headings' : FantasyPointsForFullSquad.GetDfHeadingsList(fielding_df), 
+                            'rows' : FantasyPointsForFullSquad.GetDfRowsList(fielding_df), 
+                            'total_points': Fantasy_Calculator.GetTotalFieldingPoints() 
+                             } 
+        
+                } 
+
+    return render_template('fantasyContest/fantasyPointsBreakdown.html', df_display=df_display) 
+
 
 
 
