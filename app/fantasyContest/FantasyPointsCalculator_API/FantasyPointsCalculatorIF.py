@@ -10,15 +10,24 @@ Created on Sun Jan  2 11:04:29 2022
 import pandas as pd
 
 
-## Project Includes
-from .FantasyPointsCalculator.ScoreCardGenerator.BattingScoreCardGenerator import BattingScoreCard 
-from .FantasyPointsCalculator.ScoreCardGenerator.BowlingScoreCardGenerator import BowlingScoreCard 
-from .FantasyPointsCalculator.ScoreCardGenerator.FieldingScoreCardGenerator import FieldingScoreCard
+## Project Includes 
+try: ## for outside of flask project usecases
+    from FantasyPointsCalculator.ScoreCardGenerator.BattingScoreCardGenerator import BattingScoreCard 
+    from FantasyPointsCalculator.ScoreCardGenerator.BowlingScoreCardGenerator import BowlingScoreCard 
+    from FantasyPointsCalculator.ScoreCardGenerator.FieldingScoreCardGenerator import FieldingScoreCard
 
-from .FantasyPointsCalculator.FantasyBattingPointsGenerator import FantasyBattingPoints 
-from .FantasyPointsCalculator.FantasyBowlingPointsGenerator import FantasyBowlingPoints
-from .FantasyPointsCalculator.FantasyFieldingPointsGenerator import FantasyFieldingPoints
+    from FantasyPointsCalculator.FantasyBattingPointsGenerator import FantasyBattingPoints 
+    from FantasyPointsCalculator.FantasyBowlingPointsGenerator import FantasyBowlingPoints
+    from FantasyPointsCalculator.FantasyFieldingPointsGenerator import FantasyFieldingPoints
 
+except ModuleNotFoundError: ## for inside of flask project environemnt 
+    from .FantasyPointsCalculator.ScoreCardGenerator.BattingScoreCardGenerator import BattingScoreCard 
+    from .FantasyPointsCalculator.ScoreCardGenerator.BowlingScoreCardGenerator import BowlingScoreCard 
+    from .FantasyPointsCalculator.ScoreCardGenerator.FieldingScoreCardGenerator import FieldingScoreCard
+
+    from .FantasyPointsCalculator.FantasyBattingPointsGenerator import FantasyBattingPoints 
+    from .FantasyPointsCalculator.FantasyBowlingPointsGenerator import FantasyBowlingPoints
+    from .FantasyPointsCalculator.FantasyFieldingPointsGenerator import FantasyFieldingPoints
 
 ''' 
 user_inputs_dict=
