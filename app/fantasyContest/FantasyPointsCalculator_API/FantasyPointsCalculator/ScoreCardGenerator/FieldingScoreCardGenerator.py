@@ -40,7 +40,8 @@ class FieldingScoreCard(object):
             bs = BeautifulSoup(page.content, 'lxml')
         
             table_body=bs.find_all('tbody')
-            fielding_df = pd.DataFrame(columns=["Name","Desc","Team"])
+            fielding_df = pd.DataFrame(columns=["Name","Desc","Team"]) 
+            batting_columns=["Name","Desc","Runs", "Balls", "4s", "6s", "SR", "Team"]
             
             for i, table in enumerate(table_body[0:len(table_body):2]):
                 rows = table.find_all('tr')
@@ -52,7 +53,7 @@ class FieldingScoreCard(object):
                                               
                     cols[0]=re.sub(r"\W+", ' ', cols[0].split("(c)")[0]).strip()                     
                     #print (cols)
-                    if len(cols) >= len(fielding_df.columns):            
+                    if len(cols) >= len(batting_columns):            
                         fielding_df = fielding_df.append(pd.Series(
                         [re.sub(r"\W+", ' ', cols[0].split("(c)")[0]).strip(), cols[1],i+1], 
                         index=fielding_df.columns ), ignore_index=True)
