@@ -48,7 +48,19 @@ TestDict= {
               'squad_url':'https://www.espncricinfo.com/series/bangladesh-in-new-zealand-2021-22-1288977/new-zealand-vs-bangladesh-1st-test-1288979/match-playing-xi',
               'score_url':'https://www.espncricinfo.com/series/bangladesh-in-new-zealand-2021-22-1288977/new-zealand-vs-bangladesh-1st-test-1288979/full-scorecard'
         
-            }
+            },  
+    
+    'test8':{
+              'squad_url':'https://www.espncricinfo.com/series/ireland-in-usa-and-west-indies-2021-22-1291182/west-indies-vs-ireland-3rd-odi-1277087/match-squads',
+              'score_url':'https://www.espncricinfo.com/series/ireland-in-usa-and-west-indies-2021-22-1291182/west-indies-vs-ireland-3rd-odi-1277087/full-scorecard'
+        
+            } 
+    
+    # 'test9':{
+    #           'squad_url':'',
+    #           'score_url':''
+        
+    #         }
     
     
     

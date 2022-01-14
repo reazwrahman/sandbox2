@@ -131,22 +131,25 @@ def displayPointsBreakdown():
     fielding_df = Fantasy_Calculator.GetFieldingDf()
 
     df_display= {  
-        'user_name': user_name,
-        'batting_display' : {'headings' : FantasyPointsForFullSquad.GetDfHeadingsList(batting_df), 
-                            'rows' : FantasyPointsForFullSquad.GetDfRowsList(batting_df), 
-                            'total_points': Fantasy_Calculator.GetTotalBattingPoints() 
-                            },
-                             
-        'bowling_display' : {'headings' : FantasyPointsForFullSquad.GetDfHeadingsList(bowling_df), 
-                            'rows' : FantasyPointsForFullSquad.GetDfRowsList(bowling_df), 
-                            'total_points': Fantasy_Calculator.GetTotalBowlingPoints() 
-                            },
-                            
+                'user_name': user_name,
+                'batting_display' : {
+                                    'headings' : FantasyPointsForFullSquad.GetDfHeadingsList(batting_df), 
+                                    'rows' : FantasyPointsForFullSquad.GetDfRowsList(batting_df), 
+                                    'total_points': Fantasy_Calculator.GetTotalBattingPoints() 
+                                    },
+                                    
+                'bowling_display' : { 
+                                    'headings' : FantasyPointsForFullSquad.GetDfHeadingsList(bowling_df), 
+                                    'rows' : FantasyPointsForFullSquad.GetDfRowsList(bowling_df), 
+                                    'total_points': Fantasy_Calculator.GetTotalBowlingPoints() 
+                                    },
+                                    
 
-        'fielding_display' : {'headings' : FantasyPointsForFullSquad.GetDfHeadingsList(fielding_df), 
-                            'rows' : FantasyPointsForFullSquad.GetDfRowsList(fielding_df), 
-                            'total_points': Fantasy_Calculator.GetTotalFieldingPoints() 
-                             } 
+                'fielding_display' : { 
+                                    'headings' : FantasyPointsForFullSquad.GetDfHeadingsList(fielding_df), 
+                                    'rows' : FantasyPointsForFullSquad.GetDfRowsList(fielding_df), 
+                                    'total_points': Fantasy_Calculator.GetTotalFieldingPoints() 
+                                    } 
         
                 } 
 

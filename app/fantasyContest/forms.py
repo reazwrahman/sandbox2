@@ -20,4 +20,4 @@ class ActiveGamesForm(FlaskForm):
 ######## ------------------------------------------------------####  
 class ViewDetailsForm(FlaskForm):  
     #game_selection = SelectField(u'Select a game: ', coerce=int)
-    submit = SubmitField('View Details')  
+    submit = SubmitField('View Details Point Distribution')  
