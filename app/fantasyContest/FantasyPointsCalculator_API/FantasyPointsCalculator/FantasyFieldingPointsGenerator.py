@@ -11,7 +11,7 @@ import pandas as pd
 
 ############## Calculate Fantasy Points for Fielding ##################
 class FantasyFieldingPoints(object) :
-    def __init__(self,batting_score_card,squad,points_per_catch=15): 
+    def __init__(self,batting_score_card,squad,points_per_catch=10): 
         self.batsmen_df=batting_score_card 
         self.squad=squad  
         self.points_per_catch=points_per_catch
